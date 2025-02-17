@@ -128,20 +128,6 @@ void BLEHandler::sendData(const uint8_t *data, size_t length)
         // BLE UART를 통해 데이터 전송
         bleuart.write(data, length);
     }
-
-    // // 헤더 전송 (명령어 타입)
-    // uint8_t header = cmdLargeData;
-    // bleuart.write(&header, 1);
-    // delay(10); // 안정성을 위한 지연
-
-    // // 데이터를 청크 단위로 분할하여 전송
-    // while (offset < length)
-    // {
-    //     size_t chunk_size = min(mtu_size, length - offset);
-    //     bleuart.write(&data[offset], chunk_size);
-    //     offset += chunk_size;
-    //     delay(20); // 안정성을 위한 지연
-    // }
 }
 
 void BLEHandler::processCommand()
@@ -159,8 +145,6 @@ void BLEHandler::processCommand()
     {
         DEBUG_PRINTF("LED control\n");
         digitalWrite(LED_PIN, buf[1] ? HIGH : LOW);
-        uint8_t response[2] = {cmdLED, buf[1]};
-        sendData(response, 2);
         break;
     }
     case cmdStatus:

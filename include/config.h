@@ -8,9 +8,12 @@
 
 // GPIO 설정
 #define BUTTON_PIN 5
-#define LED_PIN LED_BUILTIN
 #define SHORT_PRESS_TIME 500 // 1초
 #define LONG_PRESS_TIME 1500 // 1.5초
+
+#define SHORT_BLINK_DURATION 200   // 200ms
+#define MEDIUM_BLINK_DURATION 1000 // 1000ms
+#define LONG_BLINK_DURATION 2000   // 2000ms
 
 // 태스크 설정
 #define STACK_SIZE_GPIO 1024
@@ -26,8 +29,9 @@
 #define QUEUE_SIZE 10
 
 // 버퍼 크기도 증가
-#define MAX_CHUNK_SIZE 512   // BLE MTU 크기와 동일하게 설정
-#define MAX_BUFFER_SIZE 2048 // 전체 버퍼 크기도 증가
+#define MAX_CHUNK_SIZE 244   // MTU - 3 (ATT 헤더)
+#define BLE_MTU_SIZE 247     // 최대 MTU 크기로 변경
+#define MAX_BUFFER_SIZE 1024 // 전체 버퍼 크기도 증가
 
 // ADC 설정
 #define ADC_PIN A0
@@ -35,13 +39,14 @@
 #define PRIORITY_ADC 3
 #define SAMPLING_TIME 100 // 100msec
 
-typedef enum {
-    cmdLED = 0x01,         // LED 제어 명령. LED의 상태를 제어합니다.
-    cmdStatus = 0x02,      // 시스템 상태 요청. 현재 시스템 상태를 전송합니다.
-    cmdLargeData = 0x03,   // 대용량 데이터 전송 요청. 테스트 데이터의 큰 버퍼를 전송합니다.
-    cmdDiagnosis = 0x04,   // 시스템 진단 데이터 요청. 진단 정보를 전송합니다.
-    cmdADC = 0x05,         // ADC
-    cmdUnknown = 0xFF      // Unknown command
+typedef enum
+{
+    cmdLED = 0x01,       // LED 제어 명령. LED의 상태를 제어합니다.
+    cmdStatus = 0x02,    // 시스템 상태 요청. 현재 시스템 상태를 전송합니다.
+    cmdLargeData = 0x03, // 대용량 데이터 전송 요청. 테스트 데이터의 큰 버퍼를 전송합니다.
+    cmdDiagnosis = 0x04, // 시스템 진단 데이터 요청. 진단 정보를 전송합니다.
+    cmdADC = 0x05,       // ADC
+    cmdUnknown = 0xFF    // Unknown command
 } BLECommand_t;
 
 #define DEBUG 1

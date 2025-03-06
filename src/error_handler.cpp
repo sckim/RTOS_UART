@@ -4,9 +4,9 @@
 void errorHandler(const char* message) {
     DEBUG_PRINTF("%s\n", message);
     while (true) {
-        digitalWrite(LED_BUILTIN, HIGH);
+        digitalWrite(LED_RED, HIGH);
         delay(500);
-        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(LED_RED, LOW);
         delay(500);
     }
 }

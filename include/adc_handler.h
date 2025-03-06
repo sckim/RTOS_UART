@@ -1,7 +1,7 @@
 #ifndef ADC_HANDLER_H
 #define ADC_HANDLER_H
 
-#include <Arduino.h>
+#include "config.h"
 
 class ADCHandler {
 private:

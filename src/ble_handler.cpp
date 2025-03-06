@@ -13,6 +13,9 @@ void BLEHandler::init()
     Bluefruit.setName("HKNU EE RTOS");
     Bluefruit.setTxPower(4);
 
+    Bluefruit.configPrphBandwidth(BANDWIDTH_AUTO);
+    // Bluefruit.configPrphBandwidth(BANDWIDTH_HIGH);  // 대역폭 설정
+
     // BLE UART 서비스 설정
     bleuart.begin();
 
@@ -89,7 +92,7 @@ void BLEHandler::sendLargeData(const uint8_t* data, size_t length) {
 
     // 데이터를 청크 단위로 분할하여 전송
     while (offset < length) {
-        uint8_t chunkPacket[20];  // MTU 크기 + 헤더(1byte)
+        uint8_t chunkPacket[MAX_CHUNK_SIZE];  // MTU 크기 + 헤더(1byte)
         chunkPacket[0] = DATA_CHUNK_PACKET;  // 청크 패킷 헤더
         
         size_t chunk_size = min(mtu_size, length - offset);
@@ -144,7 +147,7 @@ void BLEHandler::processCommand()
     case '1':
     {
         DEBUG_PRINTF("LED control\n");
-        digitalWrite(LED_PIN, buf[1] ? HIGH : LOW);
+        digitalWrite(LED_RED, buf[1] ? HIGH : LOW);
         break;
     }
     case cmdStatus:
@@ -159,15 +162,15 @@ void BLEHandler::processCommand()
     case '3':
     {
         DEBUG_PRINTF("Large data transfer\n");
-        uint8_t testBuffer[1024];
+        uint8_t testBuffer[MAX_BUFFER_SIZE];
         uint16_t value = 0;
-        for (uint16_t i = 0; i < 1024; i+=2)
+        for (uint16_t i = 0; i < MAX_BUFFER_SIZE; i+=2)
         {   
             testBuffer[i] = (uint8_t)((value >> 8) & 0xFF);
             testBuffer[i + 1] = (uint8_t)(value & 0xFF);
             value++;
         }
-        sendLargeData(testBuffer, 1024);
+        sendLargeData(testBuffer, MAX_BUFFER_SIZE);
         break;
     }
     case cmdADC:

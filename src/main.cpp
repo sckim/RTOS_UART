@@ -11,7 +11,8 @@
 
 // 전역 객체 선언
 ButtonHandler MainButton(BUTTON_PIN);
-LEDHandler LedIndicator(LED_PIN);
+LEDHandler RedLedIndicator(LED_RED);
+LEDHandler BlueLedIndicator(LED_BLUE);
 
 BLEHandler bleHandler;
 ADCHandler adcHandler(ADC_PIN);
@@ -37,7 +38,7 @@ void TaskADC(void *pvParameters)
         if (xGPIOSemaphore != NULL && xSemaphoreTake(xGPIOSemaphore, pdMS_TO_TICKS(5)) == pdTRUE)
         {
             // int adcValue = adcHandler.readADC();
-            int adcValue = dataIndex;  // for testing
+            int adcValue = dataIndex; // for testing
 
             adcDataBuffer[dataIndex * 2] = (adcValue >> 8) & 0xFF;
             adcDataBuffer[dataIndex * 2 + 1] = adcValue & 0xFF;
@@ -48,7 +49,7 @@ void TaskADC(void *pvParameters)
                 if (bleHandler.getConnected())
                 {
                     // BLE UART를 통해 직접 데이터 전송
-                    uint8_t header[1] = {0x05};  // ADC 데이터 타입
+                    uint8_t header[1] = {0x05}; // ADC 데이터 타입
                     bleHandler.sendData(header, 1);
                     bleHandler.sendData(adcDataBuffer, dataIndex * 2);
                 }
@@ -62,31 +63,31 @@ void TaskADC(void *pvParameters)
     }
 }
 
-void TaskLedIndicator(void *pvParameters)
+void TaskRedLedIndicator(void *pvParameters)
 {
     ButtonEvent_t receivedEvent;
 
-    for(;;)
+    for (;;)
     {
         if (xQueueReceive(xButtonEventQueue, &receivedEvent, portMAX_DELAY) == pdTRUE)
         {
-            switch(receivedEvent)
+            switch (receivedEvent)
             {
-                case BUTTON_SHORT_PRESS:
-                    DEBUG_PRINTF("Short press\n");
-                    LedIndicator.shortBlink();
-                    break;
-                case BUTTON_MEDIUM_PRESS:
-                    DEBUG_PRINTF("Medium press\n");
-                    LedIndicator.mediumBlink();
-                    break;
-                case BUTTON_LONG_PRESS:
-                    DEBUG_PRINTF("Long press\n");   
-                    LedIndicator.longBlink();
-                    break;
-                case BUTTON_NO_EVENT:
-                    DEBUG_PRINTF("No event\n");
-                    break;
+            case BUTTON_SHORT_PRESS:
+                DEBUG_PRINTF("Short press\n");
+                RedLedIndicator.shortBlink();
+                break;
+            case BUTTON_MEDIUM_PRESS:
+                DEBUG_PRINTF("Medium press\n");
+                RedLedIndicator.mediumBlink();
+                break;
+            case BUTTON_LONG_PRESS:
+                DEBUG_PRINTF("Long press\n");
+                RedLedIndicator.longBlink();
+                break;
+            case BUTTON_NO_EVENT:
+                DEBUG_PRINTF("No event\n");
+                break;
             }
         }
     }
@@ -96,10 +97,10 @@ void setup()
 {
     Serial.begin(115200);
 
-#if defined(ARDUINO_NRF52840_ADAFRUIT) || \
-    defined(ARDUINO_NRF52_ADAFRUIT) ||    \
-    defined(ARDUINO_AVR_LEONARDO) ||      \
-    defined(ARDUINO_SAMD_ZERO)
+#if DEBUG && (defined(ARDUINO_NRF52840_ADAFRUIT) || \
+              defined(ARDUINO_NRF52_ADAFRUIT) ||    \
+              defined(ARDUINO_AVR_LEONARDO) ||      \
+              defined(ARDUINO_SAMD_ZERO))
     while (!Serial)
         delay(10);
 #endif
@@ -118,12 +119,12 @@ void setup()
     }
 
     MainButton.begin();
-    LedIndicator.turnOff();
-   
+    RedLedIndicator.turnOff();
+
     adcHandler.init();
     bleHandler.init();
 
-    xTaskCreate(TaskLedIndicator, "GeneralOutput", STACK_SIZE_GPIO, NULL, PRIORITY_GPIO_OUTPUT, NULL);
+    xTaskCreate(TaskRedLedIndicator, "GeneralOutput", STACK_SIZE_GPIO, NULL, PRIORITY_GPIO_OUTPUT, NULL);
 }
 
 void loop()
